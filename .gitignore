@@ -36,6 +36,15 @@ out/
 ### VS Code ###
 .vscode/
 
+# Mac system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
 # Environment variables
 .env
 
