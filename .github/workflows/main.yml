@@ -1,0 +1,42 @@
+name: CI & Deploy to Heroku (Buildpack)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: 'gradle'
+
+      # Runa tests before deploying ---
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Run tests
+        run: ./gradlew test --no-daemon
+
+      # Deploy to Heroku via buildpacks (push code; Heroku builds) ---
+      - name: Setup Heroku
+        uses: heroku/actions/setup@v2
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+
+      - name: Deploy to Heroku
+        uses: heroku/actions/deploy-via-git@v2
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          branch: main
+
