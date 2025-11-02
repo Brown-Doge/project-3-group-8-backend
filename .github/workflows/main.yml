@@ -20,14 +20,17 @@ jobs:
           java-version: '21'
           cache: 'gradle'
 
-      # 🧪 Run tests before deploying
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
       - name: Run tests
         run: ./gradlew test --no-daemon
 
-      # 🚀 Deploy to Heroku via Buildpack (no Docker)
+      #  Install Heroku CLI 
+      - name: Install Heroku CLI
+        run: curl https://cli-assets.heroku.com/install.sh | sh
+
+      # Deploy to Heroku 
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.14.15
         with:
