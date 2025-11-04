@@ -39,9 +39,5 @@ tasks.named('test') {
 }
 
 tasks.register("stage") {
-<<<<<<< HEAD
     dependsOn("clean", "bootJar")   // produce the fat jar Heroku will run
-=======
-	dependsOn("clean", "bootJar")   // produce the fat jar Heroku will run
->>>>>>> 806e780 (Updated build.gradle)
 }
