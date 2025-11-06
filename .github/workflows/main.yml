@@ -1,4 +1,4 @@
-name: CI & Deploy to Heroku (Buildpack)
+name: CI & Deploy to Heroku (Docker)
 
 on:
   push:
@@ -13,6 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # CI tests still run on the host (not inside Docker)
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -26,16 +27,18 @@ jobs:
       - name: Run tests
         run: ./gradlew test --no-daemon
 
-      #  Install Heroku CLI 
+      # ⬇️ Install Heroku CLI (optional — not required for Docker deploys)
       - name: Install Heroku CLI
         run: curl https://cli-assets.heroku.com/install.sh | sh
 
-      # Deploy to Heroku 
-      - name: Deploy to Heroku
+      # 🚀 Deploy Docker image to Heroku (Dockerfile at repo root)
+      - name: Deploy Docker image to Heroku
         uses: akhileshns/heroku-deploy@v3.14.15
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          usedocker: false
-          branch: main
+          usedocker: true
+          docker_heroku_process_type: web
+
+
