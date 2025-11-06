@@ -10,7 +10,7 @@ description = 'Demo project for Spring Boot'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 
@@ -25,8 +25,19 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.postgresql:postgresql:42.6.0'
+	implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+	testImplementation 'com.jayway.jsonpath:json-path:2.8.0'
+
+	testRuntimeOnly 'com.h2database:h2'
+
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.register("stage") {
+    dependsOn("clean", "bootJar")   // produce the fat jar Heroku will run
 }

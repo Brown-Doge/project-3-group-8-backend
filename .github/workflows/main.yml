@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up JDK
@@ -20,23 +20,22 @@ jobs:
           java-version: '21'
           cache: 'gradle'
 
-      # Runa tests before deploying ---
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
       - name: Run tests
         run: ./gradlew test --no-daemon
 
-      # Deploy to Heroku via buildpacks (push code; Heroku builds) ---
-      - name: Setup Heroku
-        uses: heroku/actions/setup@v2
-        with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+      #  Install Heroku CLI 
+      - name: Install Heroku CLI
+        run: curl https://cli-assets.heroku.com/install.sh | sh
 
+      # Deploy to Heroku 
       - name: Deploy to Heroku
-        uses: heroku/actions/deploy-via-git@v2
+        uses: akhileshns/heroku-deploy@v3.14.15
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          usedocker: false
           branch: main
-
