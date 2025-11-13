@@ -38,7 +38,7 @@ public class UserControllerTest {
     void testGetAllUsers() throws Exception {
         // Setup test user
         UserEntity testUser = new UserEntity();
-        testUser.setUserId(3);
+        testUser.setUserId(3L);
         testUser.setUserName("testuser");
         testUser.setUserEmail("testuser@example.com");
 

@@ -10,7 +10,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
@@ -25,34 +24,27 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:19006}")
     private String allowedOrigins;
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
     @Bean
-SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-  return http
-      .csrf(csrf -> csrf.disable())
-      .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-      .authorizeHttpRequests(auth -> {
-        auth.requestMatchers(
-            "/",
-            "/test-db",
-            "/actuator/health"
-        ).permitAll();
-        auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
-        auth.anyRequest().authenticated();
-      })
-      // 👇 return 401 for APIs instead of 302 redirect
-      .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-      .oauth2Login(oauth -> {}) // withDefaults()
-      .build();
-}
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/", "/test-db", "/swagger-ui/**", "/v3/api-docs/**").permitAll();
+                    auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+                    auth.anyRequest().authenticated();
+                })
+                // return 401 for APIs instead of 302 redirect
+                .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .oauth2Login(oauth -> {})
+                .build();
+    }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
-        cfg.setAllowedOrigins(origins); // or cfg.setAllowedOriginPatterns(origins) if you need wildcards
+        cfg.setAllowedOrigins(origins);
         cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin",
                 "Access-Control-Request-Method", "Access-Control-Request-Headers"));
@@ -63,4 +55,3 @@ SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return source;
     }
 }
-
