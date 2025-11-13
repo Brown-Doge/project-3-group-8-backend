@@ -1,29 +1,27 @@
 package com.example.EventLink.config;
 
-import com.example.EventLink.security.JwtAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    // Comma-separated list; override in env with APP_CORS_ALLOWED_ORIGINS
     @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:19006}")
     private String allowedOrigins;
 
@@ -31,48 +29,38 @@ public class SecurityConfig {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for JWT
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless for JWT
-                .authorizeHttpRequests( auth -> {
-                    auth.requestMatchers("/", "/api/auth/**").permitAll(); // Allow auth endpoints
-                    auth.anyRequest().authenticated();
-                })
-                .oauth2Login(withDefaults()) // Keep OAuth2 login
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // Add JWT filter
-                .build();
-    }
+SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  return http
+      .csrf(csrf -> csrf.disable())
+      .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+      .authorizeHttpRequests(auth -> {
+        auth.requestMatchers(
+            "/",
+            "/test-db",
+            "/actuator/health"
+        ).permitAll();
+        auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+        auth.anyRequest().authenticated();
+      })
+      // 👇 return 401 for APIs instead of 302 redirect
+      .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+      .oauth2Login(oauth -> {}) // withDefaults()
+      .build();
+}
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Parse allowed origins from environment variable or use defaults
+        CorsConfiguration cfg = new CorsConfiguration();
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
-        configuration.setAllowedOrigins(origins);
-        
-        // Allow all HTTP methods needed for REST API
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        
-        // Allow necessary headers for authentication and content
-        configuration.setAllowedHeaders(Arrays.asList(
-            "Authorization", 
-            "Content-Type", 
-            "Accept", 
-            "Origin", 
-            "Access-Control-Request-Method", 
-            "Access-Control-Request-Headers"
-        ));
-        
-        // Allow credentials for authentication
-        configuration.setAllowCredentials(true);
-        
-        // Apply CORS configuration to all endpoints
+        cfg.setAllowedOrigins(origins); // or cfg.setAllowedOriginPatterns(origins) if you need wildcards
+        cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        cfg.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin",
+                "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+        cfg.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        
+        source.registerCorsConfiguration("/**", cfg);
         return source;
     }
 }
+
