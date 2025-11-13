@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class UserEntity {  // matches file name
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
+    private Long userId;
 
     @Column(name = "user_name", nullable = false)
     private String userName;
@@ -15,15 +15,22 @@ public class UserEntity {  // matches file name
     @Column(name = "user_email", nullable = false)
     private String userEmail;
 
-    //public UserEntity() {}
-    // getters and setters
+    @Column(name = "profile_picture", nullable = false)
+    private String profilePicture;
 
+    public String getProfilePicture() {
+        return profilePicture;
+    }
 
-    public Integer getUserId() {
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }           
+
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -42,4 +49,6 @@ public class UserEntity {  // matches file name
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
     }
+
+    
 }
