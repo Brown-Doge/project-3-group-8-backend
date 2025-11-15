@@ -78,4 +78,16 @@ public class FriendshipService {
         f.getRequestedBy()
     );
   }
+
+  @Transactional
+public void delete(Integer friendshipId, Integer actingUserId) {
+    Friendship f = repo.findById(friendshipId)
+            .orElseThrow(() -> new IllegalArgumentException("Friendship not found"));
+
+    // Either participant may delete/unfriend
+    if (!actingUserId.equals(f.getUser1Id()) && !actingUserId.equals(f.getUser2Id())) {
+        throw new IllegalArgumentException("Only participants can delete this friendship.");
+    }
+    repo.delete(f);
+}
 }
