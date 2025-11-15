@@ -1,5 +1,6 @@
 package com.example.EventLink.controller;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/test-db")
+@ConditionalOnProperty(name = "spring.datasource.url")
 public class DbTestController {
 
     private final JdbcTemplate jdbcTemplate;

@@ -24,9 +24,6 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:19006}")
     private String allowedOrigins;
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
     @Bean
 SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
   return http
@@ -52,7 +49,7 @@ SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
-        cfg.setAllowedOrigins(origins); // or cfg.setAllowedOriginPatterns(origins) if you need wildcards
+        cfg.setAllowedOrigins(origins);
         cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin",
                 "Access-Control-Request-Method", "Access-Control-Request-Headers"));
@@ -63,4 +60,3 @@ SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return source;
     }
 }
-
