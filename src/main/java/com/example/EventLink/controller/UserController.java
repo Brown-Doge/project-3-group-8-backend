@@ -1,7 +1,7 @@
 package com.example.EventLink.controller;
 
-import com.example.EventLink.entity.UserEntity;
-import com.example.EventLink.repository.UserRepository;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.example.EventLink.entity.UserEntity;
+import com.example.EventLink.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/users")
@@ -51,7 +52,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/users")
+    @GetMapping
     public ResponseEntity<List<UserEntity>> getAllUsers() {
         List<UserEntity> users = userRepository.findAll();
         return ResponseEntity.ok(users); // 200 OK
