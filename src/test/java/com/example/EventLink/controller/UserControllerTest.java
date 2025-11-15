@@ -46,7 +46,7 @@ public class UserControllerTest {
         given(userRepository.findAll()).willReturn(Collections.singletonList(testUser));
 
         // Perform GET request and assert
-        mockMvc.perform(get("/users"))
+        mockMvc.perform(get("/api/users/users"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
